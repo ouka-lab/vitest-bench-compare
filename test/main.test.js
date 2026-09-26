@@ -126,6 +126,21 @@ describe('main', () => {
     });
   });
 
+  test('prints the comparison instead of commenting in dry-run mode', async (t) => {
+    const { env } = setup(t);
+    const { fetch, requests } = fakeGitHub();
+    const logs = [];
+    t.mock.method(console, 'log', (message) => logs.push(message));
+
+    const body = await main(
+      { ...env, INPUT_DRY_RUN: 'true', INPUT_GITHUB_TOKEN: '' },
+      { fetch },
+    );
+
+    assert.equal(requests.length, 0);
+    assert.ok(logs.includes(body));
+  });
+
   test('skips install when it is empty', async (t) => {
     const { repo, env } = setup(t);
     const { fetch } = fakeGitHub();

@@ -8,6 +8,7 @@ import { renderComment } from './render.js';
 
 /**
  * Runs the whole flow: base branch → pull request → comment.
+ * In dry-run mode, the comment is printed to stdout instead of being posted.
  *
  * @param {NodeJS.ProcessEnv} env The environment variables.
  * @param {{ fetch?: typeof fetch }} [deps] Injectable dependencies for tests.
@@ -39,6 +40,12 @@ export async function main(env, { fetch } = {}) {
     currentSha: pullRequest.base.sha,
     compareSha: pullRequest.head.sha,
   });
+
+  if (env.INPUT_DRY_RUN === 'true') {
+    console.log('Dry run: skipped posting the comment. Comment body:\n');
+    console.log(body);
+    return body;
+  }
 
   const result = await upsertComment({
     token: required(env, 'INPUT_GITHUB_TOKEN'),

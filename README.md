@@ -115,6 +115,22 @@ For a monorepo, set `working-directory` and point `source` at the package's outp
     working-directory: library
 ```
 
+### Dry run
+
+To try the action without posting anything to the pull request, set `dry-run: true`. The comparison is printed to the Actions log (the output of the `Compare benchmarks` step) instead of being posted as a comment.
+
+```yaml
+- uses: ouka-lab/vitest-bench-compare@54b9cc02550dbee71b66e3ee1333736d131cb491 # v1.0.1
+  with:
+    dir: ${{ runner.temp }}/bench
+    source: benchmarks
+    install: pnpm install --frozen-lockfile
+    run: pnpm exec vitest bench --run
+    dry-run: true
+```
+
+In dry-run mode, the `pull-requests: write` permission is not needed, so the action also works on pull requests from forks.
+
 ## Inputs
 
 | Name                | Required | Default               | Description                                                                                                    |
@@ -125,13 +141,14 @@ For a monorepo, set `working-directory` and point `source` at the package's outp
 | `install`           |    no    | `''`                  | Command to install dependencies after each checkout. Skipped if empty.                                         |
 | `working-directory` |    no    | `.`                   | Directory to run `install` and `run` in, relative to the workspace root.                                       |
 | `github-token`      |    no    | `${{ github.token }}` | Token used to post the pull request comment.                                                                   |
+| `dry-run`           |    no    | `false`               | Print the comparison to the Actions log instead of posting it as a pull request comment.                       |
 
 ## How it works
 
 1. Check out the base commit (`pull_request.base.sha`) → run `install` → run `run` → copy `source` to `<dir>/current/`
 2. Check out the pull request commit (`pull_request.head.sha`) → run `install` → run `run` → copy `source` to `<dir>/compare/`
 3. Find `**/*.json` in both folders and match them by relative path
-4. Create or update the pull request comment
+4. Create or update the pull request comment (or print it to the log with `dry-run: true`)
 
 `source` is removed before each run, so results of the base run never leak into the pull request run. The workspace is left on the pull request commit.
 
@@ -142,11 +159,11 @@ Both runs happen sequentially on the same runner to keep the conditions as close
 - `pull_request` events only
 - `actions/checkout` with `fetch-depth: 0`, so both commits are available
 - Node.js 22 or later on `PATH` (e.g. via `actions/setup-node`)
-- `pull-requests: write` permission
+- `pull-requests: write` permission (not needed with `dry-run: true`)
 
 ## Limitations
 
-- **Pull requests from forks cannot be commented on.** On `pull_request` events from forks, `GITHUB_TOKEN` is read-only. Open the pull request from a branch in the same repository.
+- **Pull requests from forks cannot be commented on.** On `pull_request` events from forks, `GITHUB_TOKEN` is read-only. Open the pull request from a branch in the same repository, or use `dry-run: true` to see the results in the Actions log.
 - The action runs `install` and `run` from both commits, so only use it on repositories where you trust the pull request code.
 
 ## Development
