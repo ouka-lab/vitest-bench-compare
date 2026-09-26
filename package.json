@@ -5,6 +5,12 @@
   "description": "Compare Vitest benchmark results between the base branch and a pull request and post them as a comment",
   "license": "MIT",
   "author": "ysknsid25",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouka-lab/vitest-bench-compare.git"
+  },
+  "homepage": "https://github.com/ouka-lab/vitest-bench-compare#readme",
+  "bugs": "https://github.com/ouka-lab/vitest-bench-compare/issues",
   "type": "module",
   "engines": {
     "node": ">=22"

@@ -1,4 +1,4 @@
-name: Vitest Bench Compare
+name: 'Vitest Bench Compare'
 description: Run Vitest benchmarks on the base branch and the pull request, then post the comparison as a pull request comment
 author: ysknsid25
 

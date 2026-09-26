@@ -93,7 +93,7 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      - uses: ysknsid25/vitest-bench-compare@v1
+      - uses: ouka-lab/vitest-bench-compare@v1
         with:
           dir: ${{ runner.temp }}/bench
           source: benchmarks
@@ -104,7 +104,7 @@ jobs:
 For a monorepo, set `working-directory` and point `source` at the package's output folder:
 
 ```yaml
-- uses: ysknsid25/vitest-bench-compare@v1
+- uses: ouka-lab/vitest-bench-compare@v1
   with:
     dir: ${{ runner.temp }}/bench
     source: library/benchmarks

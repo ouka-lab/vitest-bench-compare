@@ -21,7 +21,7 @@ Requirements:
 The action has no dependencies, so there is nothing to install.
 
 ```bash
-git clone https://github.com/ysknsid25/vitest-bench-compare.git
+git clone https://github.com/ouka-lab/vitest-bench-compare.git
 cd vitest-bench-compare
 npm test
 ```
