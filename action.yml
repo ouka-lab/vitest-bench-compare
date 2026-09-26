@@ -1,0 +1,44 @@
+name: Vitest Bench Compare
+description: Run Vitest benchmarks on the base branch and the pull request, then post the comparison as a pull request comment
+author: ysknsid25
+
+branding:
+  icon: bar-chart-2
+  color: green
+
+inputs:
+  dir:
+    description: Directory to collect results in. `current/` (base branch) and `compare/` (pull request) are created inside it
+    required: true
+  source:
+    description: Benchmark output directory to copy results from, relative to the workspace root
+    required: true
+  run:
+    description: Command to run the benchmarks
+    required: true
+  install:
+    description: Command to install dependencies after each checkout
+    required: false
+    default: ''
+  working-directory:
+    description: Directory to run `install` and `run` in, relative to the workspace root
+    required: false
+    default: '.'
+  github-token:
+    description: Token used to post the pull request comment
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Compare benchmarks
+      shell: bash
+      run: node "$GITHUB_ACTION_PATH/src/main.js"
+      env:
+        INPUT_DIR: ${{ inputs.dir }}
+        INPUT_SOURCE: ${{ inputs.source }}
+        INPUT_RUN: ${{ inputs.run }}
+        INPUT_INSTALL: ${{ inputs.install }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}

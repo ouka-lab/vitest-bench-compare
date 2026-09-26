@@ -1,0 +1,160 @@
+# Vitest Bench Compare
+
+A GitHub Action that runs your [Vitest](https://vitest.dev) benchmarks on both the base branch and the pull request, and posts the comparison as a pull request comment.
+
+Vitest 5 removed the `--outputJson` / `--compare` CLI flags. Benchmark results are now written from test code via `writeResult`. This action fills the gap: put your results in one folder, and it takes care of checking out both commits, running, collecting, comparing and commenting.
+
+## Example comment
+
+> ## ⏱️ Benchmark results
+>
+> current: `3f2a9c1` (base) / compare: `8b7e4d2` (pull request)
+>
+> | bench   | current ops/sec | compare ops/sec | diff      |
+> | ------- | --------------: | --------------: | :-------- |
+> | startup |           2,000 |           2,041 | ➖ +2.04% |
+>
+> ### methods/parse
+>
+> | bench     | current ops/sec | compare ops/sec | diff       |
+> | --------- | --------------: | --------------: | :--------- |
+> | foo.parse |       3,846,154 |       4,761,905 | 🚀 +23.81% |
+> | bar.parse |       3,225,806 |       2,941,176 | 🐢 -8.82%  |
+> | legacy    |       2,500,000 |               - | 🗑️ removed |
+>
+> ### schemas/object
+>
+> | bench  | current ops/sec | compare ops/sec | diff   |
+> | ------ | --------------: | --------------: | :----- |
+> | nested |               - |         833,333 | 🆕 new |
+>
+> Diff is based on mean latency. Changes within ±5% are treated as noise.
+
+The comment is updated in place on every push instead of adding a new one.
+
+## Usage
+
+### 1. Write benchmark results into one folder
+
+Every benchmark writes its result with `writeResult` into the same base folder (e.g. `benchmarks/`). Subfolders become table groups and file names become rows.
+
+```ts
+// src/methods/parse/parse.bench.test.ts
+import { describe, test } from 'vitest';
+
+describe('parse', () => {
+  test('parsing performance [foo]', async ({ bench }) => {
+    await bench(
+      'parse',
+      { writeResult: './benchmarks/methods/parse/foo.parse.json' },
+      () => {
+        parse(object(entries), { key: 'foo' });
+      },
+    ).run();
+  });
+});
+```
+
+| Result file                               | Group            | Row         |
+| ----------------------------------------- | ---------------- | ----------- |
+| `benchmarks/startup.json`                 | (no group)       | `startup`   |
+| `benchmarks/methods/parse/foo.parse.json` | `methods/parse`  | `foo.parse` |
+| `benchmarks/schemas/object/nested.json`   | `schemas/object` | `nested`    |
+
+The benchmark file must exist on the base branch too. Otherwise, all results are reported as `🆕 new`.
+
+### 2. Add the workflow
+
+```yaml
+name: Benchmark
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - uses: ysknsid25/vitest-bench-compare@v1
+        with:
+          dir: ${{ runner.temp }}/bench
+          source: benchmarks
+          install: pnpm install --frozen-lockfile
+          run: pnpm exec vitest bench --run
+```
+
+For a monorepo, set `working-directory` and point `source` at the package's output folder:
+
+```yaml
+- uses: ysknsid25/vitest-bench-compare@v1
+  with:
+    dir: ${{ runner.temp }}/bench
+    source: library/benchmarks
+    install: pnpm install --frozen-lockfile
+    run: pnpm exec vitest bench --run
+    working-directory: library
+```
+
+## Inputs
+
+| Name                | Required | Default               | Description                                                                                                    |
+| ------------------- | :------: | --------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `dir`               |   yes    |                       | Directory to collect results in. `current/` (base branch) and `compare/` (pull request) are created inside it. |
+| `source`            |   yes    |                       | Benchmark output directory to copy results from, relative to the workspace root.                               |
+| `run`               |   yes    |                       | Command to run the benchmarks.                                                                                 |
+| `install`           |    no    | `''`                  | Command to install dependencies after each checkout. Skipped if empty.                                         |
+| `working-directory` |    no    | `.`                   | Directory to run `install` and `run` in, relative to the workspace root.                                       |
+| `github-token`      |    no    | `${{ github.token }}` | Token used to post the pull request comment.                                                                   |
+
+## How it works
+
+1. Check out the base commit (`pull_request.base.sha`) → run `install` → run `run` → copy `source` to `<dir>/current/`
+2. Check out the pull request commit (`pull_request.head.sha`) → run `install` → run `run` → copy `source` to `<dir>/compare/`
+3. Find `**/*.json` in both folders and match them by relative path
+4. Create or update the pull request comment
+
+`source` is removed before each run, so results of the base run never leak into the pull request run. The workspace is left on the pull request commit.
+
+Both runs happen sequentially on the same runner to keep the conditions as close as possible. The diff is based on mean latency, and changes within ±5% are treated as noise.
+
+## Requirements
+
+- `pull_request` events only
+- `actions/checkout` with `fetch-depth: 0`, so both commits are available
+- Node.js 22 or later on `PATH` (e.g. via `actions/setup-node`)
+- `pull-requests: write` permission
+
+## Limitations
+
+- **Pull requests from forks cannot be commented on.** On `pull_request` events from forks, `GITHUB_TOKEN` is read-only. Open the pull request from a branch in the same repository.
+- The action runs `install` and `run` from both commits, so only use it on repositories where you trust the pull request code.
+
+## Development
+
+```bash
+npm test
+```
+
+No dependencies are required. See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
+## License
+
+[MIT](./LICENSE)

@@ -1,0 +1,15 @@
+{
+  "name": "vitest-bench-compare",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Compare Vitest benchmark results between the base branch and a pull request and post them as a comment",
+  "license": "MIT",
+  "author": "ysknsid25",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\""
+  }
+}
