@@ -81,19 +81,19 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: pnpm
 
-      - uses: ouka-lab/vitest-bench-compare@v1
+      - uses: ouka-lab/vitest-bench-compare@54b9cc02550dbee71b66e3ee1333736d131cb491 # v1.0.1
         with:
           dir: ${{ runner.temp }}/bench
           source: benchmarks
@@ -101,10 +101,12 @@ jobs:
           run: pnpm exec vitest bench --run
 ```
 
+All actions are pinned to a full-length commit SHA, as recommended in [Security hardening for GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions). Tags can be moved, but commit SHAs cannot. Keep the version in the trailing comment so that tools like Dependabot can update them.
+
 For a monorepo, set `working-directory` and point `source` at the package's output folder:
 
 ```yaml
-- uses: ouka-lab/vitest-bench-compare@v1
+- uses: ouka-lab/vitest-bench-compare@54b9cc02550dbee71b66e3ee1333736d131cb491 # v1.0.1
   with:
     dir: ${{ runner.temp }}/bench
     source: library/benchmarks
