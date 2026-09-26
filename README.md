@@ -6,6 +6,8 @@ Vitest 5 removed the `--outputJson` / `--compare` CLI flags. Benchmark results a
 
 ## Example comment
 
+<img width="910" height="335" alt="image" src="https://github.com/user-attachments/assets/f79bee23-4af7-4104-8778-bea366158824" />
+
 > ## ⏱️ Benchmark results
 >
 > current: `3f2a9c1` (base) / compare: `8b7e4d2` (pull request)
@@ -130,6 +132,10 @@ To try the action without posting anything to the pull request, set `dry-run: tr
 ```
 
 In dry-run mode, the `pull-requests: write` permission is not needed, so the action also works on pull requests from forks.
+
+example:
+
+<img width="1074" height="419" alt="image" src="https://github.com/user-attachments/assets/617b6c24-7b82-424b-bd64-bb5b7b099f9b" />
 
 ## Inputs
 
