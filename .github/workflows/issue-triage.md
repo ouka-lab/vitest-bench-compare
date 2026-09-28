@@ -9,6 +9,8 @@ on:
     types: [opened, reopened]
   reaction: eyes
 
+engine: gemini
+
 permissions:
   contents: read
   issues: read
