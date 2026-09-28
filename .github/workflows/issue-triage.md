@@ -17,9 +17,9 @@ permissions:
 
 safe-outputs:
   threat-detection:
-    continue-on-error: true   # Warnings only (default)
-  staged: true
+    continue-on-error: true
   add-labels:
+    issue-intent: true
     allowed:
       - bug
       - feature
