@@ -16,6 +16,8 @@ permissions:
   issues: read
 
 safe-outputs:
+  threat-detection:
+    continue-on-error: true   # Warnings only (default)
   staged: true
   add-labels:
     allowed:
