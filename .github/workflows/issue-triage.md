@@ -9,10 +9,11 @@ on:
     types: [opened, reopened]
   reaction: eyes
 
+engine: claude
+
 permissions:
   contents: read
   issues: read
-  copilot-requests: write
 
 safe-outputs:
   staged: true
