@@ -28,6 +28,11 @@ safe-outputs:
     max: 1
 
 timeout-minutes: 10
+
+network:
+  allowed:
+    - defaults
+    - "api.anthropic.com"
 ---
 
 # Issue Triage Assistant
