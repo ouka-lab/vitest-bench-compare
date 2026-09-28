@@ -12,6 +12,7 @@ on:
 permissions:
   contents: read
   issues: read
+  copilot-requests: write
 
 safe-outputs:
   staged: true
